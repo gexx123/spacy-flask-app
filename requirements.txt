@@ -2,4 +2,3 @@ flask
 gunicorn
 spacy==2.3.2
 thinc==7.4.0
-en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.2/en_core_web_sm-2.3.2.tar.gz
