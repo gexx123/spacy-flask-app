@@ -3,7 +3,7 @@ services:
     name: spacy-flask-app
     env: python
     buildCommand: |
-      apt-get update && apt-get install -y build-essential cython
+      apt-get update && apt-get install -y build-essential python3-dev
       pip install --upgrade pip
       pip install -r requirements.txt
       python -m spacy download en_core_web_sm
