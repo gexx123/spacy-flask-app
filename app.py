@@ -1,16 +1,11 @@
 import spacy
 from flask import Flask, request, jsonify
 import requests
-import subprocess
 
 app = Flask(__name__)
 
-# Ensure the spaCy model is downloaded and linked
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-    nlp = spacy.load("en_core_web_sm")
+# Load the spaCy model
+nlp = spacy.load("en_core_web_sm")
 
 # Function to perform custom Named Entity Recognition
 def custom_ner(doc):
