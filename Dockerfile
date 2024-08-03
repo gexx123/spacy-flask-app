@@ -5,12 +5,17 @@ FROM python:3.11-slim
 WORKDIR /usr/src/app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y gcc g++ make
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    make \
+    libatlas-base-dev
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
 
-# Install pip and poetry
+# Install pip
 RUN pip install --upgrade pip
 
 # Install required packages
