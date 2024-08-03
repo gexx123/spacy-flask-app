@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
-    libatlas-base-dev
+    libatlas-base-dev \
+    libffi-dev \
+    curl
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
