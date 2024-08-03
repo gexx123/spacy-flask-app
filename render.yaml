@@ -2,5 +2,8 @@ services:
   - type: web
     name: spacy-flask-app
     env: python
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    buildCommand: |
+      apt-get update && apt-get install -y build-essential cython
+      pip install --upgrade pip
+      pip install -r requirements.txt
     startCommand: gunicorn -w 4 -b 0.0.0.0:8000 app:app
