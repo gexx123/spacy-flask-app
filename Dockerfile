@@ -8,6 +8,11 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install any needed packages specified in requirements.txt
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
