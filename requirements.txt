@@ -1,6 +1,3 @@
 flask
 gunicorn
-spacy==2.3.5
-thinc==7.4.1
-cython
-blis==0.4.1
+spacy==3.5.0
