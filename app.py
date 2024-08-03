@@ -23,8 +23,8 @@ def custom_ner(doc):
     spans = [spacy.tokens.Span(doc, start, end, label=nlp.vocab.strings[match_id]) for match_id, start, end in matches]
     
     # Filter out overlapping spans
-    filtered_spans = spacy.util.filter_spans(spans)
-    doc.ents = list(doc.ents) + filtered_spans
+    spans = spacy.util.filter_spans(spans)
+    doc.ents = list(doc.ents) + spans
     return doc
 
 @app.route('/analyze', methods=['POST'])
