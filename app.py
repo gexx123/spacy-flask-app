@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 import spacy
 from spacy.tokens import Span
 from spacy.language import Language
@@ -6,6 +6,7 @@ import requests
 import logging
 
 app = Flask(__name__)
+<<<<<<< HEAD
 logging.basicConfig(level=logging.DEBUG)
 
 # Load Spacy model
@@ -40,12 +41,22 @@ def custom_ner(doc):
 
 # Add the custom component to the pipeline
 nlp.add_pipe("custom_ner", after='ner')
+=======
+
+# Load the spaCy model
+nlp = spacy.load("en_core_web_sm")
+
+@app.route('/')
+def index():
+    return "Hello, World!"
+>>>>>>> 018f95e9352e0bc811922310f3d8d6aa23d469ee
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.json
     text = data.get('text', '')
     doc = nlp(text)
+<<<<<<< HEAD
     entities = [{ 'text': ent.text, 'label': ent.label_ } for ent in doc.ents]
     
     # Construct the params to query MongoDB API
@@ -72,5 +83,10 @@ def analyze():
 
     return jsonify(questions)
 
+=======
+    entities = [{'text': ent.text, 'label': ent.label_} for ent in doc.ents]
+    return jsonify(entities)
+
+>>>>>>> 018f95e9352e0bc811922310f3d8d6aa23d469ee
 if __name__ == "__main__":
     app.run(debug=True)
