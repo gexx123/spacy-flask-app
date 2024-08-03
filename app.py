@@ -1,68 +1,74 @@
-from flask import Flask, request, jsonify
 import spacy
-from spacy.matcher import Matcher
+from flask import Flask, request, jsonify
 import requests
 
 app = Flask(__name__)
 
-# Load the spaCy model
-nlp = spacy.load("en_core_web_sm")
+# Ensure the spaCy model is downloaded
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    from spacy.cli import download
+    download("en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
 
-# Initialize the matcher
-matcher = Matcher(nlp.vocab)
-
-# Define patterns for custom entities
-patterns = [
-    {"label": "SUBJECT", "pattern": [{"LOWER": "mathematics"}]},
-    {"label": "SUBJECT", "pattern": [{"LOWER": "science"}]},
-    {"label": "SUBJECT", "pattern": [{"LOWER": "physics"}]},
-    {"label": "SUBJECT", "pattern": [{"LOWER": "chemistry"}]},
-    {"label": "CHAPTER", "pattern": [{"LOWER": "relations"}, {"LOWER": "and"}, {"LOWER": "functions"}]},
-    {"label": "CHAPTER", "pattern": [{"LOWER": "toy"}, {"LOWER": "joy"}]},
-]
-
-# Add patterns to the matcher
-for pattern in patterns:
-    matcher.add(pattern["label"], [pattern["pattern"]])
-
+# Function to perform custom Named Entity Recognition
 def custom_ner(doc):
+    matcher = spacy.matcher.Matcher(nlp.vocab)
+
+    patterns = [
+        {"label": "SUBJECT", "pattern": [{"LOWER": "mathematics"}]},
+        {"label": "CHAPTER", "pattern": [{"LOWER": "relations"}, {"LOWER": "and"}, {"LOWER": "functions"}]}
+    ]
+
+    for pattern in patterns:
+        matcher.add(pattern["label"], [pattern["pattern"]])
+
     matches = matcher(doc)
     spans = [spacy.tokens.Span(doc, start, end, label=nlp.vocab.strings[match_id]) for match_id, start, end in matches]
+    
     # Filter out overlapping spans
     spans = spacy.util.filter_spans(spans)
     doc.ents = list(doc.ents) + spans
     return doc
 
-# Add the custom NER to the pipeline
-nlp.add_pipe(custom_ner, last=True)
-
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.json
     text = data.get('text', '')
+
     doc = nlp(text)
+    doc = custom_ner(doc)
     entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
 
-    # Extract relevant fields from the entities
-    subject = next((ent["text"] for ent in entities if ent["label"] == "SUBJECT"), None)
-    chapter = next((ent["text"] for ent in entities if ent["label"] == "CHAPTER"), None)
+    # MongoDB API URL
+    mongo_api_url = "https://my-node-app43-2.onrender.com/api/questions"
 
-    # Query the MongoDB API with the extracted fields
-    params = {}
-    if subject:
-        params['subject'] = subject
-    if chapter:
-        params['chapter'] = chapter
+    # Mapping of labels to MongoDB query fields
+    label_to_field = {
+        "CHAPTER": "chapter",
+        "DIFFICULTYLEVEL": "DifficultyLevel",
+        "SUBJECT": "Subject",
+        "TOPIC": "Topic",
+        "QUESTIONTYPE": "QuestionType",
+        "BOOKTITLE": "BookTitle",
+        "AUTHORS": "Authors"
+    }
 
-    if params:
-        response = requests.get('https://my-node-app43-2.onrender.com/api/questions', params=params)
-        if response.status_code == 200:
-            questions = response.json()
-            return jsonify(questions)
-        else:
-            return jsonify({"error": "Failed to query MongoDB API"}), 500
+    query_params = {}
+    for entity in entities:
+        field = label_to_field.get(entity["label"])
+        if field:
+            query_params[field] = entity["text"]
 
-    return jsonify(entities)
+    try:
+        response = requests.get(mongo_api_url, params=query_params)
+        response.raise_for_status()
+        questions = response.json()
+    except requests.RequestException:
+        return jsonify({"error": "Failed to query MongoDB API"}), 500
+
+    return jsonify(questions)
 
 if __name__ == "__main__":
     app.run(debug=True)
