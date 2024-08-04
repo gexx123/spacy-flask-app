@@ -23,7 +23,7 @@ RUN pip install --upgrade pip
 # Install required packages
 RUN pip install -r requirements.txt
 
-# Download the spaCy model and link it
+# Download the spaCy model
 RUN python -m spacy download en_core_web_sm
 
 # Expose port 80
