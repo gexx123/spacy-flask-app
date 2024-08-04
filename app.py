@@ -36,7 +36,11 @@ def custom_ner(doc):
     
     # Filter out overlapping spans
     filtered_spans = spacy.util.filter_spans(spans)
-    doc.ents = list(doc.ents) + filtered_spans
+    
+    # Ensure no overlapping spans
+    existing_entities = list(doc.ents)
+    non_overlapping_spans = [span for span in filtered_spans if not any(span.start < ent.end and span.end > ent.start for ent in existing_entities)]
+    doc.ents = existing_entities + non_overlapping_spans
     return doc
 
 @app.route('/analyze', methods=['POST'])
