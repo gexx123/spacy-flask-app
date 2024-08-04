@@ -5,6 +5,7 @@ from spacy.pipeline import EntityRuler
 
 app = Flask(__name__)
 
+# Load the spaCy model
 nlp = spacy.load("en_core_web_sm")
 
 # Add custom EntityRuler to the pipeline
@@ -41,7 +42,6 @@ def analyze():
     text = data.get('text', '')
     entities = custom_ner(text)
     try:
-        # Update the URL to the deployed Node.js API on Render
         response = requests.post('https://my-node-app43-2.onrender.com/api/questions', json={"entities": entities})
         response.raise_for_status()
         questions_data = response.json()
