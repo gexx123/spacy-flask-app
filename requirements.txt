@@ -2,9 +2,8 @@ flask==2.1.1
 gunicorn==20.1.0
 requests==2.27.1
 spacy==3.2.1
-setuptools==58.0.4
-wheel==0.37.1
-numpy==1.19.5
+setuptools>=58.0.4
+pip>=24.2
+numpy==1.21.5
 blis==0.7.4
 pydantic==1.8.2
-pip>=24.2
