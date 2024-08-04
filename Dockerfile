@@ -12,8 +12,7 @@ RUN apt-get update && apt-get install -y \
     make \
     libatlas-base-dev \
     libffi-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    curl
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
