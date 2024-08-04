@@ -12,9 +12,7 @@ RUN apt-get update && apt-get install -y \
     make \
     libatlas-base-dev \
     libffi-dev \
-    curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    curl
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
@@ -25,7 +23,7 @@ RUN pip install --upgrade pip
 # Install required packages
 RUN pip install -r requirements.txt
 
-# Download the spaCy model
+# Download the spaCy model and link it
 RUN python -m spacy download en_core_web_sm
 
 # Expose port 80
