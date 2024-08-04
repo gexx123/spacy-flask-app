@@ -12,9 +12,7 @@ RUN apt-get update && apt-get install -y \
     make \
     libatlas-base-dev \
     libffi-dev \
-    curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    curl
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
@@ -28,8 +26,8 @@ RUN pip install -r requirements.txt
 # Download the spaCy model
 RUN python -m spacy download en_core_web_sm
 
-# Expose port 10000 for Render
-EXPOSE 10000
+# Expose port 80
+EXPOSE 80
 
 # Run the application
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:10000", "app:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:80", "app:app"]
