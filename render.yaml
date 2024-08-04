@@ -1,12 +1,16 @@
 services:
   - type: web
-    name: my-flask-app
+    name: your-service-name
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:5000 app:app
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m spacy download en_core_web_sm
+    startCommand: gunicorn app:app
     envVars:
-      - key: FLASK_ENV
-        value: production
+      - key: PIP_NO_CACHE_DIR
+        value: "false"
+      - key: INSTALL_PACKAGES
+        value: "gcc python3-dev musl-dev"
     docker:
       systemPackages:
         - gcc
