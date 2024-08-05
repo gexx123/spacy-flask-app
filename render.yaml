@@ -6,7 +6,7 @@ services:
       pip install --upgrade pip
       pip install -r requirements.txt
       python -m spacy download en_core_web_sm
-      python -m spacy link en_core_web_sm en
+      python -m spacy link en_core_web_sm en_core_web_sm
     startCommand: gunicorn app:app
     envVars:
       - key: PIP_NO_CACHE_DIR
