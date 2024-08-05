@@ -1,15 +1,16 @@
 services:
   - type: web
-    name: your-service-name
+    name: spacy-flask-app
     env: python
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-      python -m spacy download en_core_web_sm
-      python -m spacy link en_core_web_sm en_core_web_sm
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
     startCommand: gunicorn app:app
     envVars:
       - key: PIP_NO_CACHE_DIR
         value: "false"
       - key: INSTALL_PACKAGES
         value: "gcc python3-dev musl-dev"
+    docker:
+      systemPackages:
+        - gcc
+        - python3-dev
+        - musl-dev
