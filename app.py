@@ -2,10 +2,29 @@ import spacy
 from flask import Flask, request, jsonify
 import requests
 from spacy.pipeline import EntityRuler
+import subprocess
+import os
 
 app = Flask(__name__)
 
-nlp = spacy.load("en_core_web_sm")
+# Function to download and link the spaCy model
+def download_spacy_model(model_name):
+    try:
+        subprocess.run(["python", "-m", "spacy", "download", model_name], check=True)
+        subprocess.run(["python", "-m", "spacy", "link", model_name, model_name], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to download or link spaCy model: {e}")
+        raise
+
+# Ensure the correct model name is used
+model_name = "en_core_web_sm"
+
+# Check if the model is already installed, if not download and link it
+try:
+    nlp = spacy.load(model_name)
+except OSError:
+    download_spacy_model(model_name)
+    nlp = spacy.load(model_name)
 
 # Add custom EntityRuler to the pipeline
 ruler = nlp.add_pipe("entity_ruler", before="ner")
