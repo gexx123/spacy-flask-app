@@ -60,6 +60,7 @@ def analyze():
     text = data.get('text', '')
     entities = custom_ner(text)
     try:
+        # Update the URL to the deployed Node.js API on Render
         response = requests.post('https://my-node-app43-2.onrender.com/api/questions', json={"entities": entities})
         response.raise_for_status()
         questions_data = response.json()
@@ -70,6 +71,7 @@ def analyze():
         return jsonify({"entities": entities, "questions": question_texts})
     except requests.RequestException as e:
         return jsonify({"error": "Failed to query MongoDB API", "details": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
