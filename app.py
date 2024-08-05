@@ -5,7 +5,6 @@ from spacy.pipeline import EntityRuler
 
 app = Flask(__name__)
 
-# Load the spaCy model
 nlp = spacy.load("en_core_web_sm")
 
 # Add custom EntityRuler to the pipeline
