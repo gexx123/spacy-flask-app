@@ -9,8 +9,3 @@ services:
         value: "false"
       - key: INSTALL_PACKAGES
         value: "gcc python3-dev musl-dev"
-    docker:
-      systemPackages:
-        - gcc
-        - python3-dev
-        - musl-dev
