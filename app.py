@@ -2,6 +2,7 @@ import spacy
 from flask import Flask, request, jsonify
 import requests
 from spacy.pipeline import EntityRuler
+import subprocess  # Add this line
 
 app = Flask(__name__)
 
@@ -23,7 +24,6 @@ try:
 except OSError:
     download_spacy_model(model_name)
     nlp = spacy.load(model_name)
-
 
 # Add custom EntityRuler to the pipeline
 ruler = nlp.add_pipe("entity_ruler", before="ner")
@@ -59,7 +59,7 @@ def analyze():
     text = data.get('text', '')
     entities = custom_ner(text)
     try:
-        response = requests.post('http://localhost:3000/api/questions', json={"entities": entities})
+        response = requests.post('https://my-node-app43-2.onrender.com/api/questions', json={"entities": entities})
         response.raise_for_status()
         questions_data = response.json()
         
