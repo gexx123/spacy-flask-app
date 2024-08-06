@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Set OpenAI API key directly from environment variables
-api_key = os.getenv('OPENAI_API_KEY', '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')
+api_key = os.getenv('OPENAI_API_KEY', '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')
 
 if not api_key:
     logger.error("OpenAI API key not found. Please set it in the environment variables.")
