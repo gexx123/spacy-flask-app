@@ -36,7 +36,7 @@ except OSError:
 def generate_response(prompt):
     try:
         response = openai.Completion.create(
-            engine="gpt-4-turbo",
+            engine="gpt-4",
             prompt=prompt,
             max_tokens=150
         )
@@ -48,14 +48,20 @@ def generate_response(prompt):
 def custom_ner(text):
     try:
         response = openai.Completion.create(
-            engine="gpt-4-turbo",
+            engine="gpt-4",
             prompt=f"Extract entities and their types from the following text: {text}",
             max_tokens=150
         )
-        return response.choices[0].text.strip()
+        entities_text = response.choices[0].text.strip()
+        entities = []
+        for line in entities_text.split('\n'):
+            if ':' in line:
+                label, entity = line.split(':', 1)
+                entities.append({"label": label.strip(), "text": entity.strip()})
+        return entities
     except Exception as e:
         print(f"Error extracting entities: {e}")
-        return "Error extracting entities"
+        return []
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
