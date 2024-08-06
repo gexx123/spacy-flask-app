@@ -16,7 +16,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Set OpenAI API key directly
-openai.api_key = os.getenv('OPENAI_API_KEY', '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')
+api_key = os.getenv('OPENAI_API_KEY', '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')
+
+if not api_key:
+    logger.error("OpenAI API key not found. Please set it in the environment variables.")
+else:
+    openai.api_key = api_key
 
 # Function to download and link the spaCy model
 def download_spacy_model(model_name):
