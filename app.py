@@ -56,10 +56,17 @@ def custom_ner(text):
                 {"role": "user", "content": text}
             ]
         )
-        return response.choices[0].message['content'].strip()
+        entities_text = response.choices[0].message['content'].strip()
+        # Assuming entities are returned in a format like "Entity: Type"
+        entities = []
+        for line in entities_text.split('\n'):
+            if ':' in line:
+                entity, label = line.split(':')
+                entities.append({"label": label.strip(), "text": entity.strip()})
+        return entities
     except Exception as e:
         print(f"Error extracting entities: {e}")
-        return "Error extracting entities"
+        return []
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
