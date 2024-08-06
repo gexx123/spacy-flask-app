@@ -12,7 +12,7 @@ import os
 app = Flask(__name__)
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Set OpenAI API key directly
@@ -87,14 +87,26 @@ def generate_response(prompt):
 def analyze():
     try:
         data = request.json
-        text = data.get('text', '')
+        if not data or 'text' not in data:
+            logger.error("Invalid request: no text provided")
+            return jsonify({"error": "Invalid request: no text provided"}), 400
+        
+        text = data['text']
+        logger.debug(f"Analyzing text: {text}")
+        
         entities = custom_ner(text)
+        logger.debug(f"Extracted entities: {entities}")
+        
         sentiment = analyze_sentiment(text)
+        logger.debug(f"Analyzed sentiment: {sentiment}")
+        
         ai_response = generate_response(text)
+        logger.debug(f"Generated AI response: {ai_response}")
 
         response = requests.post('https://my-node-app43-2.onrender.com/api/questions', json={"entities": entities})
         response.raise_for_status()
         questions_data = response.json()
+        logger.debug(f"Received questions data: {questions_data}")
         
         question_texts = [q.get('questionText', '') for q in questions_data.get('questions', [])]
         
