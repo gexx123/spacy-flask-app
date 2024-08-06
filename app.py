@@ -6,9 +6,14 @@ import subprocess
 from textblob import TextBlob
 import openai
 import os
+import logging
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # OpenAI API key from environment variable
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -19,7 +24,7 @@ def download_spacy_model(model_name):
         subprocess.run(["python", "-m", "spacy", "download", model_name], check=True)
         subprocess.run(["python", "-m", "spacy", "link", model_name, model_name], check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Failed to download or link spaCy model: {e}")
+        logger.error(f"Failed to download or link spaCy model: {e}")
         raise
 
 # Ensure the correct model name is used
@@ -78,9 +83,13 @@ def generate_response(prompt):
 def analyze():
     data = request.json
     text = data.get('text', '')
+    logger.info(f"Received text: {text}")
     entities = custom_ner(text)
+    logger.info(f"Extracted entities: {entities}")
     sentiment = analyze_sentiment(text)
+    logger.info(f"Analyzed sentiment: {sentiment}")
     ai_response = generate_response(text)
+    logger.info(f"Generated AI response: {ai_response}")
     
     if not entities:
         return jsonify({"error": "No relevant entities found in the input text."}), 400
@@ -90,6 +99,7 @@ def analyze():
         response = requests.post('https://my-node-app43-2.onrender.com/api/questions', json={"entities": entities})
         response.raise_for_status()
         questions_data = response.json()
+        logger.info(f"Received questions data: {questions_data}")
         
         # Extract the question text keys' values
         question_texts = [q.get('questionText', '') for q in questions_data.get('questions', [])]
@@ -101,8 +111,10 @@ def analyze():
             "ai_response": ai_response
         })
     except requests.RequestException as e:
+        logger.error(f"Failed to query MongoDB API: {e}")
         return jsonify({"error": "Failed to query MongoDB API", "details": str(e)}), 500
     except Exception as e:
+        logger.error(f"Internal Server Error: {e}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 if __name__ == '__main__':
