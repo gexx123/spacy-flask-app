@@ -36,7 +36,7 @@ except OSError:
 def generate_response(prompt):
     try:
         response = openai.Completion.create(
-            engine="gpt-4",
+            engine="gpt-3.5-turbo",
             prompt=prompt,
             max_tokens=150
         )
@@ -48,7 +48,7 @@ def generate_response(prompt):
 def custom_ner(text):
     try:
         response = openai.Completion.create(
-            engine="gpt-4",
+            engine="gpt-3.5-turbo",
             prompt=f"Extract entities and their types from the following text: {text}",
             max_tokens=150
         )
