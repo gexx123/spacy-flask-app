@@ -78,8 +78,13 @@ def generate_response(prompt):
 def analyze():
     data = request.json
     text = data.get('text', '')
+    print(f"Received text: {text}")
+    
     entities = custom_ner(text)
+    print(f"Extracted entities: {entities}")
+    
     ai_response = generate_response(text)
+    print(f"AI response: {ai_response}")
     
     try:
         # Update the URL to the deployed Node.js API on Render
