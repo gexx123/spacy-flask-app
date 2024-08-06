@@ -15,7 +15,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Set OpenAI API key directly
+# Set OpenAI API key directly from environment variables
 api_key = os.getenv('OPENAI_API_KEY', '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')
 
 if not api_key:
@@ -78,14 +78,19 @@ def analyze_sentiment(text):
 # Function to generate response using OpenAI GPT-3
 def generate_response(prompt):
     try:
+        logger.debug(f"Generating response for prompt: {prompt}")
         response = openai.Completion.create(
             engine="davinci",
             prompt=prompt,
             max_tokens=50
         )
+        logger.debug(f"OpenAI response: {response}")
         return response.choices[0].text.strip()
+    except openai.error.OpenAIError as e:
+        logger.error(f"OpenAI error: {e}")
+        return "Error generating response"
     except Exception as e:
-        logger.error(f"Error generating response from OpenAI: {e}")
+        logger.error(f"Unexpected error: {e}")
         return "Error generating response"
 
 @app.route('/analyze', methods=['POST'])
