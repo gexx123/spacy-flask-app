@@ -5,8 +5,8 @@ from spacy.pipeline import EntityRuler
 import subprocess
 from textblob import TextBlob
 import openai
-import os
 import logging
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -15,8 +15,8 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# OpenAI API key from environment variable
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Set OpenAI API key directly
+openai.api_key = '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'
 
 # Function to download and link the spaCy model
 def download_spacy_model(model_name):
@@ -42,18 +42,18 @@ ruler = nlp.add_pipe("entity_ruler", before="ner")
 
 # Define patterns for custom entities
 patterns = [
-    {"label": "SUBJECT", "pattern": [{"LOWER": "mathematics"}]},
-    {"label": "CHAPTER", "pattern": [{"LOWER": "toy"}, {"LOWER": "joy"}]},
-    {"label": "CLASS", "pattern": [{"LOWER": "class"}, {"IS_DIGIT": True}]},
-    {"label": "DifficultyLevel", "pattern": [{"LOWER": "easy"}]},
-    {"label": "DifficultyLevel", "pattern": [{"LOWER": "medium"}]},
-    {"label": "DifficultyLevel", "pattern": [{"LOWER": "hard"}]},
-    {"label": "Topic", "pattern": [{"LOWER": "drawing"}]},
-    {"label": "Topic", "pattern": [{"LOWER": "shape"}, {"LOWER": "identification"}]},
-    {"label": "QuestionType", "pattern": [{"LOWER": "activity"}]},
-    {"label": "QuestionType", "pattern": [{"LOWER": "short"}, {"LOWER": "answer"}]},
-    {"label": "BookTitle", "pattern": [{"LOWER": "maths"}, {"LOWER": "mela"}]},
-    {"label": "Authors", "pattern": [{"LOWER": "ncert"}]},
+    {"label": "SUBJECT", "pattern": "Mathematics"},
+    {"label": "CHAPTER", "pattern": "Toy Joy"},
+    {"label": "CLASS", "pattern": "Class 10"},
+    {"label": "DifficultyLevel", "pattern": "Easy"},
+    {"label": "DifficultyLevel", "pattern": "Medium"},
+    {"label": "DifficultyLevel", "pattern": "Hard"},
+    {"label": "Topic", "pattern": "Drawing"},
+    {"label": "Topic", "pattern": "Shape Identification"},
+    {"label": "QuestionType", "pattern": "Activity"},
+    {"label": "QuestionType", "pattern": "Short Answer"},
+    {"label": "BookTitle", "pattern": "Maths Mela"},
+    {"label": "Authors", "pattern": "NCERT"},
     # Add more patterns as needed
 ]
 
@@ -70,46 +70,35 @@ def analyze_sentiment(text):
     blob = TextBlob(text)
     return blob.sentiment.polarity
 
-# Function to generate response using GPT-3
+# Function to generate response using OpenAI GPT-3
 def generate_response(prompt):
-    response = openai.Completion.create(
-      engine="davinci",
-      prompt=prompt,
-      max_tokens=50
-    )
-    return response.choices[0].text.strip()
+    try:
+        response = openai.Completion.create(
+            engine="davinci",
+            prompt=prompt,
+            max_tokens=50
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        logger.error(f"Error generating response from OpenAI: {e}")
+        return "Error generating response"
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    data = request.json
-    text = data.get('text', '')
-    logger.info(f"Received text: {text}")
-    entities = custom_ner(text)
-    logger.info(f"Extracted entities: {entities}")
-    sentiment = analyze_sentiment(text)
-    logger.info(f"Analyzed sentiment: {sentiment}")
-    ai_response = generate_response(text)
-    logger.info(f"Generated AI response: {ai_response}")
-    
-    if not entities:
-        return jsonify({"error": "No relevant entities found in the input text."}), 400
-    
     try:
-        # Update the URL to the deployed Node.js API on Render
+        data = request.json
+        text = data.get('text', '')
+        entities = custom_ner(text)
+        sentiment = analyze_sentiment(text)
+        ai_response = generate_response(text)
+
         response = requests.post('https://my-node-app43-2.onrender.com/api/questions', json={"entities": entities})
         response.raise_for_status()
         questions_data = response.json()
-        logger.info(f"Received questions data: {questions_data}")
         
-        # Extract the question text keys' values
         question_texts = [q.get('questionText', '') for q in questions_data.get('questions', [])]
         
-        return jsonify({
-            "entities": entities,
-            "questions": question_texts,
-            "sentiment": sentiment,
-            "ai_response": ai_response
-        })
+        return jsonify({"entities": entities, "questions": question_texts, "sentiment": sentiment, "ai_response": ai_response})
     except requests.RequestException as e:
         logger.error(f"Failed to query MongoDB API: {e}")
         return jsonify({"error": "Failed to query MongoDB API", "details": str(e)}), 500
