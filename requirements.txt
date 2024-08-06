@@ -1,10 +1,5 @@
-Flask==2.3.2
-gunicorn==22.0.0
-requests==2.31.0
-spacy==3.6.0
-pydantic>=1.10.0,<1.11.0
-setuptools>=68.0.0
-pip>=23.0.0
-numpy==1.25.0
-textblob==0.15.3
-openai==0.27.0
+Flask
+requests
+spacy
+openai
+gunicorn
