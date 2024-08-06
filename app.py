@@ -11,6 +11,10 @@ app = Flask(__name__)
 # Set the OpenAI API key from environment variable
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
+# Ensure the OpenAI API key is set
+if not openai.api_key:
+    raise ValueError("No OpenAI API key provided. Please set the OPENAI_API_KEY environment variable.")
+
 # Function to download and link the spaCy model
 def download_spacy_model(model_name):
     try:
@@ -88,8 +92,10 @@ def analyze():
         
         return jsonify({"entities": entities, "questions": question_texts, "ai_response": ai_response})
     except requests.RequestException as e:
+        print(f"RequestException: {e}")
         return jsonify({"error": "Failed to query MongoDB API", "details": str(e)}), 500
     except Exception as e:
+        print(f"Exception: {e}")
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 if __name__ == '__main__':
