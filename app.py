@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 import requests
 from spacy.pipeline import EntityRuler
 import subprocess
-from openai import OpenAI
+import openai
 import os
 
 app = Flask(__name__)
@@ -65,7 +65,7 @@ def custom_ner(text):
 def generate_response(prompt):
     try:
         response = openai.Completion.create(
-            engine="davinci",
+            engine="text-davinci-003",
             prompt=prompt,
             max_tokens=50
         )
