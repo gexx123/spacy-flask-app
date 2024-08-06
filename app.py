@@ -1,7 +1,6 @@
 import spacy
 from flask import Flask, request, jsonify
 import requests
-from spacy.pipeline import EntityRuler
 import subprocess
 import openai
 import os
@@ -34,59 +33,36 @@ except OSError:
     download_spacy_model(model_name)
     nlp = spacy.load(model_name)
 
-# Add custom EntityRuler to the pipeline
-ruler = nlp.add_pipe("entity_ruler", before="ner")
-
-# Define patterns for custom entities
-patterns = [
-    {"label": "SUBJECT", "pattern": "Mathematics"},
-    {"label": "CHAPTER", "pattern": "Toy Joy"},
-    {"label": "CLASS", "pattern": "Class 10"},
-    {"label": "DifficultyLevel", "pattern": "Easy"},
-    {"label": "DifficultyLevel", "pattern": "Medium"},
-    {"label": "DifficultyLevel", "pattern": "Hard"},
-    {"label": "Topic", "pattern": "Drawing"},
-    {"label": "Topic", "pattern": "Shape Identification"},
-    {"label": "QuestionType", "pattern": "Activity"},
-    {"label": "QuestionType", "pattern": "Short Answer"},
-    {"label": "BookTitle", "pattern": "Maths Mela"},
-    {"label": "Authors", "pattern": "NCERT"},
-    # Add more patterns as needed
-]
-
-# Add patterns to the ruler
-ruler.add_patterns(patterns)
-
-def custom_ner(text):
-    doc = nlp(text)
-    entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
-    return entities
-
 def generate_response(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
+        response = openai.Completion.create(
+            engine="gpt-4-turbo",
+            prompt=prompt,
+            max_tokens=150
         )
-        return response['choices'][0]['message']['content']
+        return response.choices[0].text.strip()
     except Exception as e:
         print(f"Error generating response: {e}")
         return "Error generating response"
+
+def custom_ner(text):
+    try:
+        response = openai.Completion.create(
+            engine="gpt-4-turbo",
+            prompt=f"Extract entities and their types from the following text: {text}",
+            max_tokens=150
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        print(f"Error extracting entities: {e}")
+        return "Error extracting entities"
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.json
     text = data.get('text', '')
-    print(f"Received text: {text}")
-    
     entities = custom_ner(text)
-    print(f"Extracted entities: {entities}")
-    
     ai_response = generate_response(text)
-    print(f"AI response: {ai_response}")
     
     try:
         # Update the URL to the deployed Node.js API on Render
