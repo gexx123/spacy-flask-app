@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 import requests
 from spacy.pipeline import EntityRuler
 import subprocess
-import openai
+from openai import OpenAI
 import os
 
 app = Flask(__name__)
