@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 import requests
 from spacy.pipeline import EntityRuler
 import subprocess
+from textblob import TextBlob
 
 app = Flask(__name__)
 
@@ -53,11 +54,17 @@ def custom_ner(text):
     entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
     return entities
 
+# Function to analyze sentiment
+def analyze_sentiment(text):
+    blob = TextBlob(text)
+    return blob.sentiment.polarity
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.json
     text = data.get('text', '')
     entities = custom_ner(text)
+    sentiment = analyze_sentiment(text)
     
     if not entities:
         return jsonify({"error": "No relevant entities found in the input text."}), 400
@@ -71,7 +78,7 @@ def analyze():
         # Extract the question text keys' values
         question_texts = [q.get('questionText', '') for q in questions_data.get('questions', [])]
         
-        return jsonify({"entities": entities, "questions": question_texts})
+        return jsonify({"entities": entities, "questions": question_texts, "sentiment": sentiment})
     except requests.RequestException as e:
         return jsonify({"error": "Failed to query MongoDB API", "details": str(e)}), 500
     except Exception as e:
