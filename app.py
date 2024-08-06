@@ -35,33 +35,31 @@ except OSError:
 
 def generate_response(prompt):
     try:
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=prompt,
-            max_tokens=150
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
         )
-        return response.choices[0].text.strip()
+        return response.choices[0].message['content'].strip()
     except Exception as e:
         print(f"Error generating response: {e}")
         return "Error generating response"
 
 def custom_ner(text):
     try:
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=f"Extract entities and their types from the following text: {text}",
-            max_tokens=150
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Extract entities and their types from the following text."},
+                {"role": "user", "content": text}
+            ]
         )
-        entities_text = response.choices[0].text.strip()
-        entities = []
-        for line in entities_text.split('\n'):
-            if ':' in line:
-                label, entity = line.split(':', 1)
-                entities.append({"label": label.strip(), "text": entity.strip()})
-        return entities
+        return response.choices[0].message['content'].strip()
     except Exception as e:
         print(f"Error extracting entities: {e}")
-        return []
+        return "Error extracting entities"
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
