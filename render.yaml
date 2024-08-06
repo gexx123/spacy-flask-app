@@ -2,15 +2,9 @@ services:
   - type: web
     name: spacy-flask-app
     env: python
-    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    region: oregon
+    buildCommand: ""
     startCommand: gunicorn app:app
     envVars:
-      - key: PIP_NO_CACHE_DIR
-        value: "false"
-      - key: INSTALL_PACKAGES
-        value: "gcc python3-dev musl-dev"
-    docker:
-      systemPackages:
-        - gcc
-        - python3-dev
-        - musl-dev
+      - key: OPENAI_API_KEY
+        sync: true  # This ensures the key is pulled from Render's environment variables
