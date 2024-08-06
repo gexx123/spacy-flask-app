@@ -35,28 +35,30 @@ except OSError:
 
 def generate_response(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
+            max_tokens=150,
+            n=1,
+            stop=None,
+            temperature=0.5
         )
-        return response.choices[0].message['content'].strip()
+        return response.choices[0].text.strip()
     except Exception as e:
         print(f"Error generating response: {e}")
         return "Error generating response"
 
 def custom_ner(text):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Extract entities and their types from the following text."},
-                {"role": "user", "content": text}
-            ]
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=f"Extract entities and their types from the following text: {text}",
+            max_tokens=150,
+            n=1,
+            stop=None,
+            temperature=0.5
         )
-        entities_text = response.choices[0].message['content'].strip()
+        entities_text = response.choices[0].text.strip()
         # Assuming entities are returned in a format like "Entity: Type"
         entities = []
         for line in entities_text.split('\n'):
