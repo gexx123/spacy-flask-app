@@ -1,5 +1,5 @@
-Flask
-requests
-spacy
-openai
-gunicorn
+flask==2.3.2
+requests==2.31.0
+spacy==3.6.0
+gunicorn==22.0.0
+openai==0.28.0
